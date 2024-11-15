@@ -5,6 +5,8 @@ class Cluster(abc.ABC):
     id: int
     size: int
     susceptible_nb: int
+    infected_nb: int
+    recovered_nb: int
     infection_rate: float
     individuals_inside: list[Individual]
 
@@ -12,11 +14,30 @@ class Cluster(abc.ABC):
         self.id = id
         self.size = size
         self.susceptible_nb = self.size
+        self.infected_nb = 0
+        self.recovered_nb = 0
         self.infection_rate = infection_rate
         self.individuals_inside = []
 
     def __repr__(self):
-        return f"n°{self.id} - Size: {self.size} - Susceptible: {self.susceptible_nb}"
+        s = f"n°{self.id} - Size: {self.size} - Susceptible: {self.susceptible_nb} - Infected: {self.infected_nb}"
+        s += f" Recovered: {self.recovered_nb}"
+
+        return s
+
+    def add_individual(self, individual: Individual):
+        self.individuals_inside.append(individual)
+
+    def is_full(self) -> bool:
+        return self.size == len(self.individuals_inside)
+
+    def infection_event(self):
+        self.susceptible_nb -= 1
+        self.infected_nb += 1
+
+    def healing_event(self):
+        self.infected_nb -= 1
+        self.susceptible_nb += 1
 
 
 class Household(Cluster):

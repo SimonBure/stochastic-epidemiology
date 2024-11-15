@@ -1,5 +1,3 @@
-from shutil import copy2
-
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -58,24 +56,30 @@ def fill_households_and_workplaces(individuals: list[Individual], households: li
         i.household = chosen_household
         i.workplace = chosen_workplace
 
-        chosen_household.individuals_inside.append(i)
-        chosen_workplace.individuals_inside.append(i)
+        chosen_household.add_individual(i)
+        chosen_workplace.add_individual(i)
 
-        if len(chosen_household.individuals_inside) == chosen_household.size:
+        if chosen_household.is_full():
             h.remove(chosen_household)
 
-        if len(chosen_workplace.individuals_inside) == chosen_workplace.size:
+        if chosen_workplace.is_full():
             w.remove(chosen_workplace)
 
 
+def generate_random_infection_time(mean: float, deviation: float) -> float:
+    return np.random.normal(mean, deviation)
+
 if __name__ == "__main__":
+    np.random.seed(0)
+
     population_size = int(1e3)
 
     global_infection_rate = 1
     household_infection_rate = 1
     workplace_infection_rate = 1
 
-    healing_rate = 1
+    mean_infection_time = 15  # days
+    deviation_infection_time = 3
 
     households = create_households_list(population_size, household_infection_rate)
     workplaces = create_workplaces_list(population_size, workplace_infection_rate)
@@ -84,4 +88,13 @@ if __name__ == "__main__":
 
     fill_households_and_workplaces(individuals, households, workplaces)
 
-    print(individuals[:3])
+    first_infected = np.random.choice(individuals)
+    first_infected.infection(generate_random_infection_time(mean_infection_time, deviation_infection_time))
+    first_infected.household.infection_event()
+    first_infected.workplace.infection_event()
+    print(first_infected)
+    print(households[79])
+    print(workplaces[13])
+
+    time = 0
+    max_time = 500
