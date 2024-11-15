@@ -6,12 +6,12 @@ if __name__ == "__main__":
     max_time = 100
     time_step = 0.1
 
-    pop_size = 1e3
+    population_size = 1e3
 
     healing_rate = 0.001
     infection_rate = 0.004
 
-    susceptible = pop_size - 1
+    susceptible = population_size - 1
     infected = 1
     recovered = 0
 
