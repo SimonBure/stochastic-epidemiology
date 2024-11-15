@@ -1,9 +1,11 @@
 import abc
+import numpy as np
 from Individual import Individual
 
 class Cluster(abc.ABC):
     id: int
     size: int
+    susceptible: [Individual]
     susceptible_nb: int
     infected_nb: int
     recovered_nb: int
@@ -13,31 +15,42 @@ class Cluster(abc.ABC):
     def __init__(self, id: int, size: int, infection_rate: float):
         self.id = id
         self.size = size
+        self.susceptible = []
         self.susceptible_nb = self.size
         self.infected_nb = 0
         self.recovered_nb = 0
         self.infection_rate = infection_rate
-        self.individuals_inside = []
 
     def __repr__(self):
-        s = f"n°{self.id} - Size: {self.size} - Susceptible: {self.susceptible_nb} - Infected: {self.infected_nb}"
+        s = f"n°{self.id} - Size: {self.size} - Susceptible: {len(self.susceptible)} - Infected: {self.infected_nb}"
         s += f" Recovered: {self.recovered_nb}"
 
         return s
 
+    def get_random_susceptible(self) -> Individual:
+        return np.random.choice(self.susceptible)
+
     def add_individual(self, individual: Individual):
-        self.individuals_inside.append(individual)
+        self.susceptible.append(individual)
+
+    def remove_susceptible(self, infected: Individual):
+        self.susceptible.remove(infected)
 
     def is_full(self) -> bool:
-        return self.size == len(self.individuals_inside)
+        return self.size == len(self.susceptible)
 
-    def infection_event(self):
+    def random_infection(self, infection_duration: float):
+        infected = self.get_random_susceptible()
+        infected.infection(infection_duration)
+        self.remove_susceptible(infected)
+
+    def update_after_infection(self):
         self.susceptible_nb -= 1
         self.infected_nb += 1
 
     def healing_event(self):
         self.infected_nb -= 1
-        self.susceptible_nb += 1
+        self.susceptible += 1
 
 
 class Household(Cluster):

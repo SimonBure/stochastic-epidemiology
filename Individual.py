@@ -22,6 +22,8 @@ class Individual(object):
     def infection(self, infection_duration: float):
         self.is_infected = True
         self.remaining_infection_duration = infection_duration
+        self.household.remove_susceptible(self)
+        self.workplace.remove_susceptible(self)
 
     def update_infection(self, time_passed: float):
         self.remaining_infection_duration -= time_passed
