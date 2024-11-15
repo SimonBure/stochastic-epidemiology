@@ -13,7 +13,7 @@ class Cluster(abc.ABC):
         self.size = size
         self.susceptible_nb = self.size
         self.infection_rate = infection_rate
-        self.individuals_inside = [Individual() for _ in range(size)]
+        self.individuals_inside = []
 
     def __repr__(self):
         return f"n°{self.id} - Size: {self.size} - Susceptible: {self.susceptible_nb}"
