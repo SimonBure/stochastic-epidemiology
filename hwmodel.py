@@ -12,8 +12,8 @@ def fill_households_and_workplaces(individuals: list[Individual], households: Ho
     w = copy.copy(workplaces.clusters)
 
     for i in individuals:
-        chosen_household = households.get_random_cluster()
-        chosen_workplace = workplaces.get_random_cluster()
+        chosen_household = np.random.choice(h)
+        chosen_workplace = np.random.choice(w)
 
         i.household = chosen_household
         i.workplace = chosen_workplace
@@ -27,24 +27,21 @@ def fill_households_and_workplaces(individuals: list[Individual], households: Ho
         if chosen_workplace.is_full():
             w.remove(chosen_workplace)
 
-def generate_time_next_infection_event(infected: int, susceptible: int):
-    pass
-
 
 if __name__ == "__main__":
     np.random.seed(0)
 
     population_size = int(1e3)
 
-    global_infection_rate = 1
-    household_infection_rate = 1
-    workplace_infection_rate = 1
+    global_infection_proba = 1
+    household_infection_proba = 1
+    workplace_infection_proba = 1
 
     mean_infection_time = 15  # days
     deviation_infection_time = 3
 
-    households = Households(household_infection_rate, population_size)
-    workplaces = Workplaces(workplace_infection_rate, population_size)
+    workplaces = Workplaces(workplace_infection_proba, population_size)
+    households = Households(household_infection_proba, population_size)
 
     individuals = [Individual(id) for id in range(0, population_size)]
     susceptible =  []
@@ -52,8 +49,23 @@ if __name__ == "__main__":
     recovered = []
 
     fill_households_and_workplaces(individuals, households, workplaces)
+    print(workplaces)
+    max_time = 5  # days
 
-    max_time = 500  # days
+    epidemic = Epidemic(population_size, individuals, households, workplaces, global_infection_proba,
+                        mean_infection_time, deviation_infection_time, max_time)
+    epidemic.global_infection()  # first infection
 
-    epidemic = Epidemic(population_size, individuals, global_infection_rate, mean_infection_time, deviation_infection_time, max_time)
-    epidemic.global_infection()
+    while epidemic.time < epidemic.max_time or epidemic.susceptible_nb == 0:
+        epidemic.generate_next_infection_event()
+
+    susceptible_overtime = epidemic.generate_susceptible_time_series()
+    infected_overtime = epidemic.generate_infected_time_series()
+
+    plt.plot(epidemic.times, susceptible_overtime, label='S', color='grey')
+    plt.plot(epidemic.times, infected_overtime, label='I', color='red')
+    plt.legend(loc='best')
+    plt.xlabel('Time', fontsize=16)
+    plt.ylabel('Number of individuals', fontsize=16)
+
+    plt.show()

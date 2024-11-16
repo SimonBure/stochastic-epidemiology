@@ -5,11 +5,11 @@ from Individual import Individual
 class Cluster(abc.ABC):
     id: int
     size: int
-    susceptible: [Individual]
+    susceptible: list[Individual]
     susceptible_nb: int
     infected_nb: int
     recovered_nb: int
-    infection_rate: float
+    infection_proba: float
     individuals_inside: list[Individual]
 
     def __init__(self, id: int, size: int, infection_rate: float):
@@ -19,7 +19,7 @@ class Cluster(abc.ABC):
         self.susceptible_nb = self.size
         self.infected_nb = 0
         self.recovered_nb = 0
-        self.infection_rate = infection_rate
+        self.infection_proba = infection_rate
 
     def __repr__(self):
         s = f"n°{self.id} - Size: {self.size} - Susceptible: {len(self.susceptible)} - Infected: {self.infected_nb}"
@@ -38,11 +38,6 @@ class Cluster(abc.ABC):
 
     def is_full(self) -> bool:
         return self.size == len(self.susceptible)
-
-    def random_infection(self, infection_duration: float):
-        infected = self.get_random_susceptible()
-        infected.infection(infection_duration)
-        self.remove_susceptible(infected)
 
     def update_after_infection(self):
         self.susceptible_nb -= 1
