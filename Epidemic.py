@@ -11,6 +11,7 @@ class Epidemic:
     susceptible_nb: int
     infected: list[Individual]
     infected_nb: int
+    infected_time_series: list[int]
     recovered_nb: int
 
     global_infection_rate: float
@@ -33,6 +34,7 @@ class Epidemic:
         self.susceptible_nb = self.population_size
         self.infected = []
         self.infected_nb = 0
+        self.infected_time_series = [0]
         self.recovered_nb = 0
 
         self.households = households
@@ -46,6 +48,9 @@ class Epidemic:
         self.time = 0
         self.times = [0]
         self.max_time = max_time
+
+    def __repr__(self):
+        return f"Epidemic time: {self.time}. {self.infected_nb} infected. Recovered {self.recovered_nb}."
 
     def generate_next_infection_event(self):
         global_infection_rate = self.get_global_infection_rate()
@@ -75,6 +80,8 @@ class Epidemic:
         else:
             self.infection_in_cluster(infected_workplaces, (workplaces_infection_rates / sum(workplaces_infection_rates)))
 
+        self.fill_infected_time_series()
+
     def get_global_infection_rate(self) -> float:
         return self.global_infection_rate * self.susceptible_nb * self.infected_nb
 
@@ -92,6 +99,8 @@ class Epidemic:
 
     def global_infection(self):
         chosen_susceptible = np.random.choice(self.susceptible)
+        self.susceptible.remove(chosen_susceptible)
+
         chosen_susceptible.infection(self.generate_random_infection_time())
         self.infected.append(chosen_susceptible)
 
@@ -108,12 +117,40 @@ class Epidemic:
         chosen_susceptible = chosen_cluster.get_random_susceptible()
         chosen_susceptible.infection(rdm_infection_duration)
         self.infected.append(chosen_susceptible)
+        self.susceptible.remove(chosen_susceptible)
 
         self.susceptible_nb -= 1
         self.infected_nb += 1
 
-    def generate_susceptible_time_series(self) -> list[int]:
-        return [self.population_size - i for i in range(1, len(self.times) + 1)]
+    def is_zero_susceptible_remaining(self) -> bool:
+        return self.susceptible_nb == 0
 
-    def generate_infected_time_series(self) -> list[int]:
-        return [i for i in range(1, len(self.times) + 1)]
+    def end_epidemic_(self):
+        infection_durations = self.get_all_sorted_remaining_infection_durations()
+        for t in infection_durations:
+            self.times.append(t)
+            self.infected_nb -= 1
+            self.fill_infected_time_series()
+        self.time = infection_durations[-1]
+
+    def fill_susceptible_time_series(self):
+        self.susceptible_time_series.append(self.susceptible_nb)
+
+    def fill_infected_time_series(self):
+        self.infected_time_series.append(self.infected_nb)
+
+    def get_all_sorted_remaining_infection_durations(self) -> list[float]:
+        remaining_infection_durations = []
+        print(len(self.infected))
+        for i in self.infected:
+            remaining_infection_durations.append(i.remaining_infection_duration)
+        remaining_infection_durations.sort()
+        return remaining_infection_durations
+
+    def generate_susceptible_time_series(self) -> list[int]:
+        if len(self.times) > self.population_size:
+            susceptible_time_series = [self.population_size - i for i in range(self.population_size)]
+            susceptible_time_series += [0] * (len(self.times) - len(susceptible_time_series))
+        else:
+            susceptible_time_series = [self.population_size - i for i in range(len(self.times))]
+        return susceptible_time_series

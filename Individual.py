@@ -10,8 +10,7 @@ class Individual(object):
         self.remaining_infection_duration = 0.
 
     def __repr__(self):
-        s = f"Individual n°{self.id} - Infected? {self.is_infected} - "
-        s += f"Remaining infection time: {self.remaining_infection_duration}) - Recovered? {self.is_recovered}"
+        s = f"Individual n°{self.id} - Remaining infection time: {self.remaining_infection_duration}"
         s += f" - Belongs to {str(self.household)} and {str(self.workplace)}"
         return s
 

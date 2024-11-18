@@ -33,15 +33,15 @@ if __name__ == "__main__":
 
     population_size = int(1e3)
 
-    global_infection_proba = 1
-    household_infection_proba = 1
-    workplace_infection_proba = 1
+    global_infection_rate = 1e-4
+    household_infection_rate = 1e-3
+    workplace_infection_rate = 5e-4
 
     mean_infection_time = 15  # days
     deviation_infection_time = 3
 
-    workplaces = Workplaces(workplace_infection_proba, population_size)
-    households = Households(household_infection_proba, population_size)
+    workplaces = Workplaces(workplace_infection_rate, population_size)
+    households = Households(household_infection_rate, population_size)
 
     individuals = [Individual(id) for id in range(0, population_size)]
     susceptible =  []
@@ -49,21 +49,24 @@ if __name__ == "__main__":
     recovered = []
 
     fill_households_and_workplaces(individuals, households, workplaces)
-    print(workplaces)
-    max_time = 5  # days
+    # print(workplaces.clusters[0].susceptible)
+    max_time = 500  # days
 
-    epidemic = Epidemic(population_size, individuals, households, workplaces, global_infection_proba,
+    epidemic = Epidemic(population_size, individuals, households, workplaces, global_infection_rate,
                         mean_infection_time, deviation_infection_time, max_time)
     epidemic.global_infection()  # first infection
 
     while epidemic.time < epidemic.max_time or epidemic.susceptible_nb == 0:
-        epidemic.generate_next_infection_event()
+        if epidemic.is_zero_susceptible_remaining():
+            epidemic.end_epidemic_()
+            break
+        else:
+            epidemic.generate_next_infection_event()
 
-    susceptible_overtime = epidemic.generate_susceptible_time_series()
-    infected_overtime = epidemic.generate_infected_time_series()
-
-    plt.plot(epidemic.times, susceptible_overtime, label='S', color='grey')
-    plt.plot(epidemic.times, infected_overtime, label='I', color='red')
+    susceptible_time_series = epidemic.generate_susceptible_time_series()
+    print(epidemic.times)
+    plt.plot(epidemic.times, susceptible_time_series, label='S', color='grey')
+    plt.plot(epidemic.times, epidemic.infected_time_series, label='I', color='red')
     plt.legend(loc='best')
     plt.xlabel('Time', fontsize=16)
     plt.ylabel('Number of individuals', fontsize=16)
