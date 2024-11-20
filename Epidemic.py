@@ -15,6 +15,8 @@ class Epidemic:
     infected_nb: int
     infected_time_series: list[int]
 
+    infection_type_time_series: list[str]
+
     recovered_nb: int
 
     global_infection_rate: float
@@ -40,6 +42,8 @@ class Epidemic:
         self.infected = []
         self.infected_nb = 0
         self.infected_time_series = [0]
+
+        self.infection_type_time_series = []
 
         self.recovered_nb = 0
 
@@ -126,12 +130,15 @@ class Epidemic:
         chosen_event = np.random.choice(infection_types, p=infection_probabilities)
         if chosen_event == "global":
             chosen_susceptible = np.random.choice(self.susceptible)
+            self.infection_type_time_series.append('g')
         elif chosen_event == "household":
             random_household = self.households.get_random_infected_cluster(households_infection_rates)
             chosen_susceptible = random_household.get_random_susceptible()
+            self.infection_type_time_series.append('h')
         else:
             random_workplace = self.workplaces.get_random_infected_cluster(workplaces_infection_rates)
             chosen_susceptible = random_workplace.get_random_susceptible()
+            self.infection_type_time_series.append('w')
 
         return chosen_susceptible
 
@@ -144,6 +151,30 @@ class Epidemic:
     def get_workplaces_infection_rate(self) -> float:
         return self.workplaces.infection_rate * self.susceptible_nb * self.infected_nb
 
+    def get_infection_type_frequencies(self, infection_type_time_series=None) -> np.ndarray:
+        if infection_type_time_series is None:
+            infection_type_time_series = self.infection_type_time_series
+
+        total_infection_number = len(infection_type_time_series)
+
+        number_global_infections = infection_type_time_series.count('g')
+        number_household_infections = infection_type_time_series.count('h')
+        number_workplace_infections = total_infection_number - number_global_infections - number_household_infections
+
+        global_infection_freq = number_global_infections / total_infection_number
+        household_infection_freq = number_household_infections / total_infection_number
+        workplace_infection_freq = number_workplace_infections / total_infection_number
+
+        return np.array([global_infection_freq, household_infection_freq, workplace_infection_freq])
+
+    def get_infection_type_frequencies_timeseries(self):
+        frequencies_timeseries = np.zeros(shape=(len(self.infection_type_time_series), 3))
+
+        for i in range(len(self.infection_type_time_series)):
+            actual_freq = self.get_infection_type_frequencies(self.infection_type_time_series[:i+1])
+            frequencies_timeseries[i] = actual_freq
+
+        return frequencies_timeseries
 
     @staticmethod
     def generate_time_next_infection_event(rate: float) -> float:

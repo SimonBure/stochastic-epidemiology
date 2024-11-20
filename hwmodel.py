@@ -36,14 +36,14 @@ def load_results_epidemic():
 
 
 if __name__ == "__main__":
-    load = True
+    load = False
     if load:
         susceptible_time_series, infected_time_series, times = load_results_epidemic()
 
     else:
         np.random.seed(0)
 
-        population_size = int(5e3)
+        population_size = int(1e3)
 
         global_infection_rate = 1e-4
         household_infection_rate = 1e-3
@@ -80,6 +80,21 @@ if __name__ == "__main__":
         times = epidemic.times
 
         save_results_epidemic(susceptible_time_series, epidemic.infected_time_series, epidemic.times)
+
+        infection_type_freq = epidemic.get_infection_type_frequencies()
+        print(f"Frequency of global infection: {infection_type_freq[0]}")
+        print(f"Frequency of infections in households: {infection_type_freq[1]}")
+        print(f"Frequency of infections in workplaces: {infection_type_freq[2]}")
+
+        frequencies_timeseries = epidemic.get_infection_type_frequencies_timeseries()
+
+        plt.plot(frequencies_timeseries[:, 0], label='Global', color='red')
+        plt.plot(frequencies_timeseries[:, 1], label='Household', color='darkred')
+        plt.plot(frequencies_timeseries[:, 2], label='Workplace', color='darkorange')
+        plt.legend(loc='best')
+        plt.xlabel('Number infection', fontsize=16)
+        plt.ylabel('Frequency', fontsize=16)
+        plt.show()
 
     plt.plot(times, susceptible_time_series, label='S', color='grey')
     plt.plot(times, infected_time_series, label='I', color='red')
