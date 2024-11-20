@@ -39,6 +39,9 @@ class Cluster(abc.ABC):
     def is_full(self) -> bool:
         return self.size == len(self.susceptible)
 
+    def is_zero_susceptible_inside(self) -> bool:
+        return self.susceptible_nb == 0
+
     def update_after_infection(self):
         self.susceptible_nb -= 1
         self.infected_nb += 1
