@@ -243,3 +243,6 @@ class Epidemic:
         else:
             susceptible_time_series = [self.population_size - i for i in range(len(self.times))]
         return susceptible_time_series
+
+    def get_normalized_peak_size(self) -> int:
+        return np.max(self.infected_time_series) / self.population_size

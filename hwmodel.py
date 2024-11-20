@@ -62,13 +62,13 @@ if __name__ == "__main__":
 
         fill_households_and_workplaces(individuals, households, workplaces)
 
-        max_time = 500
+        max_time = 100
 
         epidemic = Epidemic(population_size, individuals, households, workplaces, global_infection_rate,
                             mean_infection_time, deviation_infection_time, max_time)
         epidemic.first_infection()
 
-        while epidemic.time < epidemic.max_time or epidemic.susceptible_nb == 0:
+        while epidemic.time < epidemic.max_time:
             if epidemic.is_zero_susceptible_remaining():
                 epidemic.end_epidemic_()
                 break
@@ -96,10 +96,11 @@ if __name__ == "__main__":
         plt.ylabel('Frequency', fontsize=16)
         plt.show()
 
+        print(f"Peak size: {epidemic.get_normalized_peak_size()}")
+
     plt.plot(times, susceptible_time_series, label='S', color='grey')
     plt.plot(times, infected_time_series, label='I', color='red')
     plt.legend(loc='best')
     plt.xlabel('Time', fontsize=16)
     plt.ylabel('Number of individuals', fontsize=16)
-
     plt.show()
