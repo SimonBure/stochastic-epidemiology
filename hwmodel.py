@@ -36,21 +36,10 @@ def load_results_epidemic():
 
 
 if __name__ == "__main__":
-    load = False
+    load = True
     if load:
         susceptible_time_series, infected_time_series, times = load_results_epidemic()
-        # print(f"Shape susceptible: {susceptible_time_series.shape}")
-        # print(susceptible_time_series)
-        # print(f"Shape infected: {infected_time_series.shape}")
-        # print(infected_time_series[:100])
-        print(f"Shape times: {times.shape}")
-        print(times[:100])
-        print(np.sort(times)[:100])
-        with open('times.txt', 'w') as f:
-            for t in times:
-                f.write(str(t))
-        # plt.plot(times, susceptible_time_series)
-        # plt.show()
+
     else:
         np.random.seed(0)
 
@@ -72,8 +61,8 @@ if __name__ == "__main__":
         recovered = []
 
         fill_households_and_workplaces(individuals, households, workplaces)
-        # print(workplaces.clusters[0].susceptible)
-        max_time = 500  # days
+
+        max_time = 500
 
         epidemic = Epidemic(population_size, individuals, households, workplaces, global_infection_rate,
                             mean_infection_time, deviation_infection_time, max_time)

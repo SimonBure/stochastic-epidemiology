@@ -187,11 +187,13 @@ class Epidemic:
 
     def end_epidemic_(self):
         infection_durations = self.get_all_sorted_remaining_infection_durations()
+        last_t = 0
         for t in infection_durations:
-            self.time += t
+            self.time += t - last_t
             self.times.append(self.time)
             self.infected_nb -= 1
             self.fill_infected_time_series()
+            last_t = t
 
     def fill_infected_time_series(self):
         self.infected_time_series.append(self.infected_nb)

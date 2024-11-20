@@ -165,3 +165,4 @@ figures
 papers
 *.rda
 *.R
+epidemics_results.npy
